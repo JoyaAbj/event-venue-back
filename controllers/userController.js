@@ -1,4 +1,6 @@
 const connection = require('../config/database/connection');
+const bcrypt = require('bcrypt');
+const { generateToken } = require('../extra/generateToken');
 
 const getAll = async (_, res) => {
   const query = `SELECT ID, fullName, email, role FROM users;`;
@@ -49,17 +51,17 @@ const login = async (req, res) => {
         message: `User with email ${email} not found`,
       });
 
-    if (password == response[0].password) {
-      res.status(200).json({
-        success: true,
-        message: `User with email ${email} logged in successfully`,
-      });
-    } else {
+    const validPassword = await bcrypt.compare(password, response[0].password);
+    if (!validPassword)
       return res.status(400).json({
         success: false,
         message: `Entered password of email ${email} is wrong`,
       });
-    }
+
+    res.status(200).json({
+      success: true,
+      message: `User with email ${email} logged in successfully`,
+    });
   } catch (error) {
     return res.status(400).json({
       success: false,
@@ -71,14 +73,16 @@ const login = async (req, res) => {
 
 const register = async (req, res) => {
   const { fullName, email, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
   const query = `INSERT INTO users (fullName, email, password) VALUES (?, ?, ?);`;
   try {
     const [response] = await connection.query(query, [
       fullName,
       email,
-      password,
+      hashedPassword,
     ]);
     const [data] = await getUserByID(response.insertId);
+    generateToken(1, 'admin');
     res.status(200).json({
       success: true,
       message: `User registered successfully`,
