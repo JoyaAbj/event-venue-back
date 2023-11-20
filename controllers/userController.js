@@ -58,9 +58,12 @@ const login = async (req, res) => {
         message: `Entered password of email ${email} is wrong`,
       });
 
+    const token = generateToken(response[0].ID, response[0].role);
+
     res.status(200).json({
       success: true,
       message: `User with email ${email} logged in successfully`,
+      token: token,
     });
   } catch (error) {
     return res.status(400).json({
@@ -82,10 +85,11 @@ const register = async (req, res) => {
       hashedPassword,
     ]);
     const [data] = await getUserByID(response.insertId);
-    generateToken(1, 'admin');
+    // const token = generateToken(data.ID, data.role);
     res.status(200).json({
       success: true,
       message: `User registered successfully`,
+      // data: { ...data, token: token },
       data: data,
     });
   } catch (error) {
