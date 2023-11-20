@@ -21,5 +21,7 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
-  }
+  },
+  "repository": "https://github.com/JoyaAbj/event-venue-back.git",
+  "author": "Joya Abou Jaoude <joyaaboujaoude627@gmail.com>"
 }
